@@ -12,10 +12,11 @@ label{display:block;font-weight:700;margin-bottom:8px}input{width:100%;padding:1
 button{border:0;border-radius:9px;padding:13px 18px;font:700 1rem system-ui;cursor:pointer}button:disabled{opacity:.55;cursor:wait}.primary{background:var(--brand);color:#fff;margin-top:12px;width:100%;transition:background .15s}.primary:hover{background:var(--brand-dark)}
 .note{font-size:.9rem;color:var(--muted);margin:9px 0 0}.status{margin-top:18px;padding:15px;border-radius:10px;background:#f1f4f8;color:var(--muted)}.status.good{background:#e8f7ef;color:var(--green)}.status.bad{background:#fff0ef;color:var(--red)}.status.warn{background:#fff7df;color:#795600}
 .result-title{font-size:1.3rem;font-weight:800;margin:0 0 4px}.distance{font-size:2rem;font-weight:850;letter-spacing:-.04em;margin:8px 0}.details{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:12px;margin-top:15px}.detail{border:1px solid var(--line);border-radius:10px;padding:12px}.detail small{display:block;color:var(--muted);margin-bottom:3px}.foot{font-size:.83rem;color:var(--muted);margin:18px 3px 0}a{color:var(--brand)}
+.owens{display:inline-block;margin:0 0 10px 4px;padding:3px 18px 6px;background:#fff;color:var(--brand);border-radius:999px;font:700 clamp(1.3rem,3.6vw,1.9rem)/1.3 "Comic Sans MS","Comic Neue","Chalkboard SE","Marker Felt",cursive;letter-spacing:0;transform:rotate(-4deg);white-space:nowrap;box-shadow:0 2px 0 var(--brand-dark)}
 .maplink{display:inline-block;margin-top:14px;padding:10px 14px;border:1px solid var(--brand);border-radius:9px;font-weight:700;text-decoration:none}.maplink:hover{background:#fff0f1}
 </style></head>
 <body>
-<header><div class="wrap"><h1>MontageKollen</h1><p>Kontrollera om kundens adress ligger inom 60 km körväg från närmaste BAUHAUS-varuhus.</p></div></header>
+<header><div class="wrap"><div class="owens">Owen's</div><h1>MontageKollen</h1><p>Kontrollera om kundens adress ligger inom 60 km körväg från närmaste BAUHAUS-varuhus.</p></div></header>
 <main class="wrap"><section class="panel">
 <label for="address">Kundens adress eller postnummer</label>
 <input id="address" autocomplete="street-address" placeholder="Exempel: Storgatan 1, Uppsala eller 753 20">
@@ -56,9 +57,9 @@ const stores=[
 ["Örebro","Säljarevägen 7, 702 36 Örebro, Sweden"],
 ["Östersund","Hagvägen 4, 831 48 Östersund, Sweden"]
 ];
-// Fasta koordinater per varuhus. Fylls i en gång med exportStoreCoords() (se README/instruktion),
-// så att sidan slipper slå upp alla varuhus vid första sökningen. Tom tabell = sidan slår upp och cachar som förut.
-const STORE_COORDS={};
+// Fasta koordinater per varuhus, så att sidan slipper slå upp alla varuhus vid första sökningen.
+// Uppdatera genom att ändra adressen ovan, tömma tabellen ({}), köra en sökning och sedan köra copy(exportStoreCoords()) i konsolen.
+const STORE_COORDS={"Göteborg, Bäckebol":{"lat":57.74619,"lon":11.99374},"Göteborg, Sisjön":{"lat":57.64251,"lon":11.95425},"Hyllinge":{"lat":56.09897,"lon":12.85548},"Kalmar":{"lat":56.68616,"lon":16.31501},"Karlstad":{"lat":59.39557,"lon":13.58431},"Knivsta":{"lat":59.74292,"lon":17.8098},"Linköping":{"lat":58.4333,"lon":15.60875},"Löddeköpinge":{"lat":55.77151,"lon":12.98847},"Malmö, Bernstorp":{"lat":55.61271,"lon":13.10622},"Malmö, Svågertorp":{"lat":55.55199,"lon":12.99766},"Norrköping":{"lat":58.6106,"lon":16.16193},"Stockholm, Bromma":{"lat":59.35259,"lon":17.96072},"Stockholm, Järfälla":{"lat":59.42007,"lon":17.85469},"Stockholm, Länna":{"lat":59.19923,"lon":18.13515},"Stockholm, Norsborg":{"lat":59.23876,"lon":17.83467},"Stockholm, Sickla":{"lat":59.30262,"lon":18.11514},"Stockholm, Upplands Väsby":{"lat":59.49972,"lon":17.92268},"Sundsvall":{"lat":62.43894,"lon":17.33363},"Uddevalla":{"lat":58.35021,"lon":11.79288},"Umeå":{"lat":63.85503,"lon":20.29485},"Uppsala":{"lat":59.84868,"lon":17.68844},"Västerås":{"lat":59.61133,"lon":16.46956},"Växjö":{"lat":56.90428,"lon":14.81812},"Örebro":{"lat":59.22168,"lon":15.14034},"Östersund":{"lat":63.16962,"lon":14.68972}};
 const $=id=>document.getElementById(id), cacheKey="bauhausMontageDrive_v1";
 let cache={};try{cache=JSON.parse(localStorage.getItem(cacheKey)||"{}")}catch(e){}
 const wait=ms=>new Promise(r=>setTimeout(r,ms));
