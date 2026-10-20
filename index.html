@@ -13,10 +13,11 @@ button{border:0;border-radius:9px;padding:13px 18px;font:700 1rem system-ui;curs
 .note{font-size:.9rem;color:var(--muted);margin:9px 0 0}.status{margin-top:18px;padding:15px;border-radius:10px;background:#f1f4f8;color:var(--muted)}.status.good{background:#e8f7ef;color:var(--green)}.status.bad{background:#fff0ef;color:var(--red)}.status.warn{background:#fff7df;color:#795600}
 .result-title{font-size:1.3rem;font-weight:800;margin:0 0 4px}.distance{font-size:2rem;font-weight:850;letter-spacing:-.04em;margin:8px 0}.details{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:12px;margin-top:15px}.detail{border:1px solid var(--line);border-radius:10px;padding:12px}.detail small{display:block;color:var(--muted);margin-bottom:3px}.foot{font-size:.83rem;color:var(--muted);margin:18px 3px 0}a{color:var(--brand)}
 .owens{display:inline-block;margin:0 0 10px 4px;padding:3px 18px 6px;background:#fff;color:var(--brand);border-radius:999px;font:700 clamp(1.3rem,3.6vw,1.9rem)/1.3 "Comic Sans MS","Comic Neue","Chalkboard SE","Marker Felt",cursive;letter-spacing:0;transform:rotate(-4deg);white-space:nowrap;box-shadow:0 2px 0 var(--brand-dark)}
+.mil{font-size:1.1rem;font-weight:600;letter-spacing:0}
 .maplink{display:inline-block;margin-top:14px;padding:10px 14px;border:1px solid var(--brand);border-radius:9px;font-weight:700;text-decoration:none}.maplink:hover{background:#fff0f1}
 </style></head>
 <body>
-<header><div class="wrap"><div class="owens">Owen's</div><h1>MontageKollen</h1><p>Kontrollera om kundens adress ligger inom 60 km körväg från närmaste BAUHAUS-varuhus.</p></div></header>
+<header><div class="wrap"><div class="owens">Owen's</div><h1>MontageKollen</h1><p>Kontrollera om kundens adress ligger inom 60 km (6 mil) körväg från närmaste BAUHAUS-varuhus. För Östersund gäller 100 km (10 mil).</p></div></header>
 <main class="wrap"><section class="panel">
 <label for="address">Kundens adress eller postnummer</label>
 <input id="address" autocomplete="street-address" placeholder="Exempel: Storgatan 1, Uppsala eller 753 20">
@@ -25,11 +26,14 @@ button{border:0;border-radius:9px;padding:13px 18px;font:700 1rem system-ui;curs
 <div id="status" class="status" role="status" aria-live="polite">Fyll i kundens adress eller postnummer och tryck på knappen.</div>
 <div id="result" hidden></div>
 </section>
-<p class="foot"><strong>Viktigt:</strong> Köravstånd beräknas via OpenStreetMap/OSRM och kan skilja sig från vald rutt i kundens navigationsapp. Kontrollera manuellt vid gränsfall. Kundens sökning skickas till OpenStreetMap för adressökning.</p>
+<p class="foot"><strong>Viktigt:</strong> Detta är ett beslutsstöd, inte en bokningsbekräftelse. Köravstånd beräknas via OpenStreetMap/OSRM och kan skilja sig från vald rutt i kundens navigationsapp. Kontrollera manuellt vid gränsfall. Kundens sökning skickas till OpenStreetMap för adressökning.</p>
 <p class="foot">Varuhuslistan omfattar 25 BAUHAUS-varuhus. Kontrollera att adresserna är aktuella och att positionerna pekar på rätt entré. <a href="https://www.bauhaus.se/storelocator/" target="_blank" rel="noopener">BAUHAUS varuhus</a>. Kartdata © <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">OpenStreetMap-bidragsgivare</a>.</p>
 </main>
 <script>
-const LIMIT_KM=60, BORDER_KM=5, SHORTLIST=5;
+const LIMIT_KM=60, BORDER_KM=5, SHORTLIST=8;
+// Särskild gräns per varuhus (km). Övriga varuhus använder LIMIT_KM.
+const STORE_LIMITS={"Östersund":100};
+const limitFor=name=>STORE_LIMITS[name]||LIMIT_KM;
 const stores=[
 ["Göteborg, Bäckebol","Hisings Backa, 422 46 Göteborg, Sweden"],
 ["Göteborg, Sisjön","Södra Långebergsgatan 21, 436 32 Askim, Sweden"],
@@ -60,11 +64,15 @@ const stores=[
 // Fasta koordinater per varuhus, så att sidan slipper slå upp alla varuhus vid första sökningen.
 // Uppdatera genom att ändra adressen ovan, tömma tabellen ({}), köra en sökning och sedan köra copy(exportStoreCoords()) i konsolen.
 const STORE_COORDS={"Göteborg, Bäckebol":{"lat":57.74619,"lon":11.99374},"Göteborg, Sisjön":{"lat":57.64251,"lon":11.95425},"Hyllinge":{"lat":56.09897,"lon":12.85548},"Kalmar":{"lat":56.68616,"lon":16.31501},"Karlstad":{"lat":59.39557,"lon":13.58431},"Knivsta":{"lat":59.74292,"lon":17.8098},"Linköping":{"lat":58.4333,"lon":15.60875},"Löddeköpinge":{"lat":55.77151,"lon":12.98847},"Malmö, Bernstorp":{"lat":55.61271,"lon":13.10622},"Malmö, Svågertorp":{"lat":55.55199,"lon":12.99766},"Norrköping":{"lat":58.6106,"lon":16.16193},"Stockholm, Bromma":{"lat":59.35259,"lon":17.96072},"Stockholm, Järfälla":{"lat":59.42007,"lon":17.85469},"Stockholm, Länna":{"lat":59.19923,"lon":18.13515},"Stockholm, Norsborg":{"lat":59.23876,"lon":17.83467},"Stockholm, Sickla":{"lat":59.30262,"lon":18.11514},"Stockholm, Upplands Väsby":{"lat":59.49972,"lon":17.92268},"Sundsvall":{"lat":62.43894,"lon":17.33363},"Uddevalla":{"lat":58.35021,"lon":11.79288},"Umeå":{"lat":63.85503,"lon":20.29485},"Uppsala":{"lat":59.84868,"lon":17.68844},"Västerås":{"lat":59.61133,"lon":16.46956},"Växjö":{"lat":56.90428,"lon":14.81812},"Örebro":{"lat":59.22168,"lon":15.14034},"Östersund":{"lat":63.16962,"lon":14.68972}};
-const $=id=>document.getElementById(id), cacheKey="bauhausMontageDrive_v1";
+const $=id=>document.getElementById(id), cacheKey="bauhausMontageDrive_v2";
 let cache={};try{cache=JSON.parse(localStorage.getItem(cacheKey)||"{}")}catch(e){}
 const wait=ms=>new Promise(r=>setTimeout(r,ms));
 const esc=s=>String(s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
 const km1=n=>n.toFixed(1).replace(".",",");
+// 1 mil = 10 km. dist() för uppmätta avstånd (57,3 km (5,7 mil)), kmMil() för gränser (60 km (6 mil)).
+const fmtNum=n=>Number.isInteger(n)?String(n):km1(n);
+const dist=n=>`${km1(n)} km (${km1(n/10)} mil)`;
+const kmMil=n=>`${fmtNum(n)} km (${fmtNum(n/10)} mil)`;
 function save(){try{localStorage.setItem(cacheKey,JSON.stringify(cache))}catch(e){}}
 function status(t,k=""){$("status").className="status "+k;$("status").textContent=t}
 // Hämtar JSON med tidsgräns och ett nytt försök vid nätverksfel, 429 eller serverfel.
@@ -129,19 +137,22 @@ $("check").addEventListener("click",async()=>{
   }
   if(!ranked.length)throw Error(routeError?"Ruttjänsten svarade inte. Försök igen senare.":"Kunde inte beräkna någon körväg. Försök igen eller kontrollera adressen manuellt.");
   ranked.sort((a,b)=>a.distance-b.distance);
-  const near=ranked[0],ok=near.distance<=LIMIT_KM,border=Math.abs(LIMIT_KM-near.distance)<=BORDER_KM,res=$("result");
+  // Varje varuhus har sin gräns. Det varuhus med störst marginal till sin gräns avgör resultatet (oftast det närmaste).
+  ranked.forEach(s=>{s.limit=limitFor(s.name);s.margin=s.limit-s.distance});
+  const nearest=ranked[0],near=ranked.reduce((a,b)=>b.margin>a.margin?b:a),lim=near.limit,ok=near.margin>=0,border=Math.abs(near.margin)<=BORDER_KM,res=$("result");
   const cls=border?"warn":(ok?"good":"bad");
-  const title=(ok?"Inom 60 km körväg":"Över 60 km körväg")+(border?" – gränsfall":"");
+  const title=(ok?"Inom ":"Över ")+kmMil(lim)+" körväg"+(border?" – gränsfall":"");
   const mapUrl=`https://www.google.com/maps/dir/?api=1&origin=${near.lat},${near.lon}&destination=${customer.lat},${customer.lon}&travelmode=driving`;
   res.hidden=false;
-  res.innerHTML=`<div class="status ${cls}"><p class="result-title">${title}</p><div class="distance">${km1(near.distance)} km</div><div>beräknat köravstånd till närmaste hittade varuhus</div>${border?`<p class="note"><strong>Nära gränsen:</strong> kontrollera rutten manuellt innan beslut.</p>`:""}</div>
-  <div class="details"><div class="detail"><small>Närmaste varuhus enligt beräknad körväg</small><strong>${esc(near.name)}</strong><br>${esc(near.address.replace(", Sweden",""))}</div><div class="detail"><small>Avstånd från 60-km-gränsen</small><strong>${km1(Math.abs(LIMIT_KM-near.distance))} km ${ok?"under gränsen":"över gränsen"}</strong></div><div class="detail"><small>Hittad adress – kontrollera att den stämmer</small><strong>${esc(customer.label||q)}</strong></div></div>
+  res.innerHTML=`<div class="status ${cls}"><p class="result-title">${title}</p><div class="distance">${km1(near.distance)} km <span class="mil">(${km1(near.distance/10)} mil)</span></div><div>beräknat köravstånd till närmaste hittade varuhus</div>${border?`<p class="note"><strong>Nära gränsen:</strong> kontrollera rutten manuellt innan beslut.</p>`:""}</div>
+  <div class="details"><div class="detail"><small>${near===nearest?"Närmaste varuhus enligt beräknad körväg":"Varuhus som avgör resultatet"}</small><strong>${esc(near.name)}</strong><br>${esc(near.address.replace(", Sweden",""))}</div><div class="detail"><small>Avstånd från gränsen (${kmMil(lim)})</small><strong>${dist(Math.abs(near.margin))} ${ok?"under gränsen":"över gränsen"}</strong></div><div class="detail"><small>Hittad adress – kontrollera att den stämmer</small><strong>${esc(customer.label||q)}</strong></div></div>
   <a class="maplink" href="${mapUrl}" target="_blank" rel="noopener">Öppna rutten i Google Maps</a>
-  <h3>Kontrollerade varuhus</h3><ol>${ranked.slice(0,5).map(s=>`<li><strong>${esc(s.name)}</strong> – ${km1(s.distance)} km körväg</li>`).join("")}</ol>
-  <p class="note">Köravståndet kommer från en automatisk ruttjänst och kan variera beroende på vald väg. Kontrollera extra noga om resultatet ligger nära 60 km.</p>`;
+  <h3>Kontrollerade varuhus</h3><ol>${ranked.slice(0,5).map(s=>`<li><strong>${esc(s.name)}</strong> – ${dist(s.distance)} körväg</li>`).join("")}</ol>
+  <p class="note">Köravståndet kommer från en automatisk ruttjänst och kan variera beroende på vald väg. Kontrollera extra noga om resultatet ligger nära gränsen.</p>`;
   status("Kontrollen är klar.");
  }catch(e){status(e.message||"Något gick fel. Kontrollera internetanslutningen och försök igen.","warn")}
  finally{btn.disabled=false}
 });
 $("address").addEventListener("keydown",e=>{if(e.key==="Enter")$("check").click()});
 </script></body></html>
+ 
