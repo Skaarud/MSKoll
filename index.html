@@ -39,9 +39,14 @@ button:disabled { opacity: .55; cursor: wait; }
 .status.warn { background: var(--warn-bg); color: var(--warn); }
 .result-title { font-size: 1.3rem; font-weight: 800; margin: 0 0 4px; }
 .distance { font-size: 2rem; font-weight: 850; letter-spacing: -.04em; margin: 8px 0; }
-.details { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 12px; margin-top: 15px; }
-.detail { border: 1px solid var(--line); border-radius: 10px; padding: 12px; background: #fff; }
-.detail small { display: block; color: var(--muted); margin-bottom: 3px; font-weight: 600; }
+
+.services-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 12px; margin-top: 15px; }
+.service-card { border: 1px solid var(--line); border-radius: 10px; padding: 16px; background: #fff; }
+.service-card small { display: block; color: var(--muted); margin-bottom: 6px; font-weight: 600; text-transform: uppercase; font-size: 0.75rem; letter-spacing: 0.05em; }
+
+.address-card { border: 1px solid var(--line); border-radius: 10px; padding: 16px; background: #fff; margin-top: 12px; }
+.address-card small { display: block; color: var(--muted); margin-bottom: 4px; font-weight: 600; text-transform: uppercase; font-size: 0.75rem; letter-spacing: 0.05em; }
+
 .foot { font-size: .83rem; color: var(--muted); margin: 18px 3px 0; }
 a { color: var(--brand); }
 .owens { display: inline-block; margin: 0 0 10px 4px; padding: 3px 18px 6px; background: #fff; color: var(--brand); border-radius: 999px; font: 700 clamp(1.3rem, 3.6vw, 1.9rem)/1.3 "Comic Sans MS", "Comic Neue", cursive; transform: rotate(-4deg); box-shadow: 0 2px 0 var(--brand-dark); }
@@ -49,11 +54,14 @@ a { color: var(--brand); }
 .mil { font-size: 1.1rem; font-weight: 600; }
 .maplink { display: inline-block; margin-top: 10px; padding: 10px 14px; border: 1px solid var(--brand); border-radius: 999px; font-weight: 700; text-decoration: none; font-size: 0.9rem; }
 .maplink:hover { background: #fff0f1; }
-.badge { display: inline-block; padding: 4px 8px; border-radius: 6px; font-weight: 700; font-size: 0.85rem; margin-top: 4px; }
+.badge { display: inline-block; padding: 4px 10px; border-radius: 6px; font-weight: 700; font-size: 0.9rem; }
 .badge.ok { background: #d1e7dd; color: #0f5132; }
 .badge.no { background: #f8d7da; color: #842029; }
 .badge.fee { background: #fff3cd; color: #664d03; }
-.map-preview { width: 100%; height: 180px; object-fit: cover; border-radius: 8px; margin-top: 8px; border: 1px solid var(--line); }
+
+.map-wrapper { position: relative; margin-top: 10px; border-radius: 8px; overflow: hidden; border: 1px solid var(--line); }
+.map-preview { width: 100%; height: 220px; border: 0; display: block; }
+.map-mask { position: absolute; bottom: 0; right: 0; width: 140px; height: 25px; background: #f6f7f9; pointer-events: none; }
 </style>
 </head>
 <body>
@@ -226,7 +234,6 @@ $("check").addEventListener("click", async () => {
     const isOstersund = nearest.name.includes("Östersund");
     const distKm = nearest.distance;
 
-    // Regler för Montageservice
     let montageOk = false;
     let montageText = "";
     let montageClass = "no";
@@ -258,12 +265,10 @@ $("check").addEventListener("click", async () => {
       }
     }
 
-    // Regler för Hembesök
     const hembesokOk = distKm <= LIMIT_HEMBESOK;
     const hembesokText = hembesokOk ? "Godkänd (Inom 4 mil)" : "Ej godkänd (Över 4 mil)";
     const hembesokClass = hembesokOk ? "ok" : "no";
 
-    // Överskridande & Statusfärg
     let panelStatusClass = "good";
     if (!montageOk && !hembesokOk) {
       panelStatusClass = "bad";
@@ -271,7 +276,6 @@ $("check").addEventListener("click", async () => {
       panelStatusClass = "warn";
     }
 
-    // Statisk kartbild via OpenStreetMap Tiles (API-fri)
     const bboxPad = 0.015;
     const minLat = Math.min(customer.lat, nearest.lat) - bboxPad;
     const maxLat = Math.max(customer.lat, nearest.lat) + bboxPad;
@@ -291,27 +295,31 @@ $("check").addEventListener("click", async () => {
         ${milFeeText ? `<p style="margin:6px 0 0;font-size:1.05rem;">${milFeeText}</p>` : ""}
       </div>
 
-      <div class="details">
-        <div class="detail">
+      <div class="services-grid">
+        <div class="service-card">
           <small>Hembesök (Max 4 mil)</small>
           <span class="badge ${hembesokClass}">${hembesokText}</span>
         </div>
-        <div class="detail">
+        <div class="service-card">
           <small>Montageservice (${isOstersund ? "Östersund max 10 mil" : "Max 6 mil"})</small>
           <span class="badge ${montageClass}">${montageText}</span>
         </div>
-        <div class="detail">
-          <small>Hittad adress</small>
-          <strong>${esc(customer.label || q)}</strong>
-          <iframe class="map-preview" src="${staticMapUrl}" style="border:0;" loading="lazy"></iframe>
-          <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:6px;">
-            <a class="maplink" href="${googleMapsDir}" target="_blank" rel="noopener">Öppna rutt i Google Maps</a>
-            <a class="maplink" href="${googleStreetView}" target="_blank" rel="noopener">Gatuvy (Street View)</a>
-          </div>
+      </div>
+
+      <div class="address-card">
+        <small>Hittad adress</small>
+        <strong style="font-size: 1.05rem;">${esc(customer.label || q)}</strong>
+        <div class="map-wrapper">
+          <iframe class="map-preview" src="${staticMapUrl}" loading="lazy"></iframe>
+          <div class="map-mask"></div>
+        </div>
+        <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:10px;">
+          <a class="maplink" href="${googleMapsDir}" target="_blank" rel="noopener">Öppna rutt i Google Maps</a>
+          <a class="maplink" href="${googleStreetView}" target="_blank" rel="noopener">Gatuvy (Street View)</a>
         </div>
       </div>
 
-      <h3>Närmaste varuhus</h3>
+      <h3 style="margin-top:20px;">Närmaste varuhus</h3>
       <ol>${ranked.slice(0, 5).map(s => `<li><strong>${esc(s.name)}</strong> –${dist(s.distance)} körväg</li>`).join("")}</ol>
     `;
 
