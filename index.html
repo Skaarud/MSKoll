@@ -1,158 +1,329 @@
 <!doctype html>
 <html lang="sv">
 <head>
-<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>MontageKollen – Kontroll av montageservice</title>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>MontageKollen – Kontroll av serviceavstånd</title>
 <style>
-:root{--brand:#c8202f;--brand-dark:#a91522;--ink:#20232a;--muted:#687181;--line:#e2e4e8;--bg:#f6f7f9;--green:#167647;--red:#c8202f}
-*{box-sizing:border-box}body{margin:0;background:var(--bg);font:16px/1.5 system-ui,-apple-system,Segoe UI,Roboto,Arial;color:var(--ink)}
-header{background:var(--brand);color:#fff;padding:27px 18px;border-bottom:5px solid var(--brand-dark)}.wrap{max-width:850px;margin:auto}h1{font-size:clamp(1.4rem,3vw,2rem);margin:0 0 5px}header p{margin:0;color:#ffe3e6}
-main{padding:22px 14px 44px}.panel{background:#fff;border:1px solid var(--line);border-radius:14px;padding:clamp(18px,4vw,28px);box-shadow:0 8px 28px #1720330c}
-label{display:block;font-weight:700;margin-bottom:8px}input{width:100%;padding:14px 13px;border:1px solid #aab5c5;border-radius:9px;font:inherit}input:focus{outline:3px solid #f3b9bf;border-color:var(--brand)}
-button{border:0;border-radius:9px;padding:13px 18px;font:700 1rem system-ui;cursor:pointer}button:disabled{opacity:.55;cursor:wait}.primary{background:var(--brand);color:#fff;margin-top:12px;width:100%;transition:background .15s}.primary:hover{background:var(--brand-dark)}
-.note{font-size:.9rem;color:var(--muted);margin:9px 0 0}.status{margin-top:18px;padding:15px;border-radius:10px;background:#f1f4f8;color:var(--muted)}.status.good{background:#e8f7ef;color:var(--green)}.status.bad{background:#fff0ef;color:var(--red)}.status.warn{background:#fff7df;color:#795600}
-.result-title{font-size:1.3rem;font-weight:800;margin:0 0 4px}.distance{font-size:2rem;font-weight:850;letter-spacing:-.04em;margin:8px 0}.details{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:12px;margin-top:15px}.detail{border:1px solid var(--line);border-radius:10px;padding:12px}.detail small{display:block;color:var(--muted);margin-bottom:3px}.foot{font-size:.83rem;color:var(--muted);margin:18px 3px 0}a{color:var(--brand)}
-.owens{display:inline-block;margin:0 0 10px 4px;padding:3px 18px 6px;background:#fff;color:var(--brand);border-radius:999px;font:700 clamp(1.3rem,3.6vw,1.9rem)/1.3 "Comic Sans MS","Comic Neue","Chalkboard SE","Marker Felt",cursive;letter-spacing:0;transform:rotate(-4deg);white-space:nowrap;box-shadow:0 2px 0 var(--brand-dark)}
-.v2{display:inline-block;margin:-6px 0 10px 12px;padding:2px 12px 4px;background:#ffd84a;color:#7a1019;border:2px solid #fff;border-radius:999px;font:700 clamp(1rem,2.8vw,1.4rem)/1.3 "Comic Sans MS","Comic Neue","Chalkboard SE","Marker Felt",cursive;transform:rotate(7deg);vertical-align:top;white-space:nowrap;box-shadow:0 2px 0 var(--brand-dark)}
-.mil{font-size:1.1rem;font-weight:600;letter-spacing:0}
-.maplink{display:inline-block;margin-top:14px;padding:10px 14px;border:1px solid var(--brand);border-radius:9px;font-weight:700;text-decoration:none}.maplink:hover{background:#fff0f1}
-</style></head>
+:root {
+  --brand: #c8202f;
+  --brand-dark: #a91522;
+  --ink: #20232a;
+  --muted: #687181;
+  --line: #e2e4e8;
+  --bg: #f6f7f9;
+  --green: #167647;
+  --red: #c8202f;
+  --warn: #795600;
+  --warn-bg: #fff7df;
+}
+* { box-sizing: border-box; }
+body { margin: 0; background: var(--bg); font: 16px/1.5 system-ui, -apple-system, Segoe UI, Roboto, Arial; color: var(--ink); }
+header { background: var(--brand); color: #fff; padding: 27px 18px; border-bottom: 5px solid var(--brand-dark); }
+.wrap { max-width: 850px; margin: auto; }
+h1 { font-size: clamp(1.4rem, 3vw, 2rem); margin: 0 0 5px; }
+header p { margin: 0; color: #ffe3e6; }
+main { padding: 22px 14px 44px; }
+.panel { background: #fff; border: 1px solid var(--line); border-radius: 14px; padding: clamp(18px, 4vw, 28px); box-shadow: 0 8px 28px #1720330c; }
+label { display: block; font-weight: 700; margin-bottom: 8px; }
+input { width: 100%; padding: 14px 13px; border: 1px solid #aab5c5; border-radius: 9px; font: inherit; }
+input:focus { outline: 3px solid #f3b9bf; border-color: var(--brand); }
+button { border: 0; border-radius: 9px; padding: 13px 18px; font: 700 1rem system-ui; cursor: pointer; }
+button:disabled { opacity: .55; cursor: wait; }
+.primary { background: var(--brand); color: #fff; margin-top: 12px; width: 100%; transition: background .15s; }
+.primary:hover { background: var(--brand-dark); }
+.note { font-size: .9rem; color: var(--muted); margin: 9px 0 0; }
+.status { margin-top: 18px; padding: 15px; border-radius: 10px; background: #f1f4f8; color: var(--muted); }
+.status.good { background: #e8f7ef; color: var(--green); }
+.status.bad { background: #fff0ef; color: var(--red); }
+.status.warn { background: var(--warn-bg); color: var(--warn); }
+.result-title { font-size: 1.3rem; font-weight: 800; margin: 0 0 4px; }
+.distance { font-size: 2rem; font-weight: 850; letter-spacing: -.04em; margin: 8px 0; }
+.details { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 12px; margin-top: 15px; }
+.detail { border: 1px solid var(--line); border-radius: 10px; padding: 12px; background: #fff; }
+.detail small { display: block; color: var(--muted); margin-bottom: 3px; font-weight: 600; }
+.foot { font-size: .83rem; color: var(--muted); margin: 18px 3px 0; }
+a { color: var(--brand); }
+.owens { display: inline-block; margin: 0 0 10px 4px; padding: 3px 18px 6px; background: #fff; color: var(--brand); border-radius: 999px; font: 700 clamp(1.3rem, 3.6vw, 1.9rem)/1.3 "Comic Sans MS", "Comic Neue", cursive; transform: rotate(-4deg); box-shadow: 0 2px 0 var(--brand-dark); }
+.v2 { display: inline-block; margin: -6px 0 10px 12px; padding: 2px 12px 4px; background: #ffd84a; color: #7a1019; border: 2px solid #fff; border-radius: 999px; font: 700 clamp(1rem, 2.8vw, 1.4rem)/1.3 "Comic Sans MS", "Comic Neue", cursive; transform: rotate(7deg); vertical-align: top; box-shadow: 0 2px 0 var(--brand-dark); }
+.mil { font-size: 1.1rem; font-weight: 600; }
+.maplink { display: inline-block; margin-top: 10px; padding: 10px 14px; border: 1px solid var(--brand); border-radius: 999px; font-weight: 700; text-decoration: none; font-size: 0.9rem; }
+.maplink:hover { background: #fff0f1; }
+.badge { display: inline-block; padding: 4px 8px; border-radius: 6px; font-weight: 700; font-size: 0.85rem; margin-top: 4px; }
+.badge.ok { background: #d1e7dd; color: #0f5132; }
+.badge.no { background: #f8d7da; color: #842029; }
+.badge.fee { background: #fff3cd; color: #664d03; }
+.map-preview { width: 100%; height: 180px; object-fit: cover; border-radius: 8px; margin-top: 8px; border: 1px solid var(--line); }
+</style>
+</head>
 <body>
-<header><div class="wrap"><div class="owens">Owen's</div><span class="v2">v2.0</span><h1>MontageKollen</h1><p>Kontrollera om kundens adress ligger inom 60 km (6 mil) körväg från närmaste BAUHAUS-varuhus. För Östersund gäller 100 km (10 mil).</p></div></header>
-<main class="wrap"><section class="panel">
-<label for="address">Kundens adress eller postnummer</label>
-<input id="address" autocomplete="street-address" placeholder="Exempel: Storgatan 1, Uppsala eller 753 20">
-<p class="note">Ange helst fullständig adress inklusive ort för bästa resultat.</p>
-<button class="primary" id="check">Kontrollera montageservice</button>
-<div id="status" class="status" role="status" aria-live="polite">Fyll i kundens adress eller postnummer och tryck på knappen.</div>
-<div id="result" hidden></div>
-</section>
-<p class="foot"><strong>Viktigt:</strong> Detta är ett beslutsstöd, inte en bokningsbekräftelse. Köravstånd beräknas via OpenStreetMap/OSRM och kan skilja sig från vald rutt i kundens navigationsapp. Kontrollera manuellt vid gränsfall. Kundens sökning skickas till OpenStreetMap för adressökning.</p>
-<p class="foot">Varuhuslistan omfattar 25 BAUHAUS-varuhus. Kontrollera att adresserna är aktuella och att positionerna pekar på rätt entré. <a href="https://www.bauhaus.se/storelocator/" target="_blank" rel="noopener">BAUHAUS varuhus</a>. Kartdata © <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">OpenStreetMap-bidragsgivare</a>.</p>
+<header>
+  <div class="wrap">
+    <div class="owens">Owen's</div><span class="v2">v2.0</span>
+    <h1>MontageKollen</h1>
+    <p>Avståndskontroll för Montageservice (6 mil) och Hembesök (4 mil).</p>
+  </div>
+</header>
+<main class="wrap">
+  <section class="panel">
+    <label for="address">Kundens adress eller postnummer</label>
+    <input id="address" autocomplete="street-address" placeholder="Exempel: Storgatan 1, Uppsala eller 753 20">
+    <p class="note">Ange gärna gata, nummer och ort för exakt ruttberäkning.</p>
+    <button class="primary" id="check">Kontrollera serviceavstånd</button>
+    <div id="status" class="status" role="status" aria-live="polite">Fyll i kundens adress och tryck på knappen.</div>
+    <div id="result" hidden></div>
+  </section>
+  <p class="foot"><strong>Beslutsstöd:</strong> Köravstånd beräknas via OpenStreetMap/OSRM. Vid gränsfall eller otydliga rutter, verifiera manuellt i Google Maps.</p>
 </main>
+
 <script>
-const LIMIT_KM=60, BORDER_KM=5, SHORTLIST=8;
-// Särskild gräns per varuhus (km). Övriga varuhus använder LIMIT_KM.
-const STORE_LIMITS={"Östersund":100};
-const limitFor=name=>STORE_LIMITS[name]||LIMIT_KM;
-const stores=[
-["Göteborg, Bäckebol","Hisings Backa, 422 46 Göteborg, Sweden"],
-["Göteborg, Sisjön","Södra Långebergsgatan 21, 436 32 Askim, Sweden"],
-["Hyllinge","Brännaregatan 2, 265 75 Hyllinge, Sweden"],
-["Kalmar","Bilbyggarvägen 5, 393 56 Kalmar, Sweden"],
-["Karlstad","Banvaktarvägen 5, 656 39 Karlstad, Sweden"],
-["Knivsta","Hyvelgatan 1, 741 71 Knivsta, Sweden"],
-["Linköping","Östra Svedengatan 31, 582 73 Linköping, Sweden"],
-["Löddeköpinge","Handelsvägen 1, 246 42 Löddeköpinge, Sweden"],
-["Malmö, Bernstorp","Vassvägen 26, 232 61 Arlöv, Sweden"],
-["Malmö, Svågertorp","Nornegatan 8, 215 86 Malmö, Sweden"],
-["Norrköping","Kromgatan 2, 602 23 Norrköping, Sweden"],
-["Stockholm, Bromma","Masugnsvägen 36, 168 67 Stockholm, Sweden"],
-["Stockholm, Järfälla","Enköpingsvägen 41, 177 38 Järfälla, Sweden"],
-["Stockholm, Länna","Gamla Nynäsvägen 600, 142 51 Skogås, Sweden"],
-["Stockholm, Norsborg","Segersbyvägen 26, 145 63 Norsborg, Sweden"],
-["Stockholm, Sickla","Sickla Allé 2-4, 131 65 Nacka, Sweden"],
-["Stockholm, Upplands Väsby","Kranvägen 8, 194 61 Upplands Väsby, Sweden"],
-["Sundsvall","Gesällvägen 13, 863 41 Sundsvall, Sweden"],
-["Uddevalla","Hedkärr 103, 451 76 Uddevalla, Sweden"],
-["Umeå","Skalbaggevägen 5, 906 20 Umeå, Sweden"],
-["Uppsala","Verkstadsgatan 16, 753 23 Uppsala, Sweden"],
-["Västerås","Hallsta Gårdsgata 1, 721 38 Västerås, Sweden"],
-["Växjö","Älgvägen 3, 352 45 Växjö, Sweden"],
-["Örebro","Säljarevägen 7, 702 36 Örebro, Sweden"],
-["Östersund","Hagvägen 4, 831 48 Östersund, Sweden"]
+const LIMIT_HEMBESOK = 40;
+const LIMIT_MONTAGE = 60;
+const OSTERSUND_MAX = 100;
+const COST_PER_MIL = 190;
+const SHORTLIST = 8;
+
+const stores = [
+  ["Göteborg, Bäckebol", "Hisings Backa, 422 46 Göteborg, Sweden"],
+  ["Göteborg, Sisjön", "Södra Långebergsgatan 21, 436 32 Askim, Sweden"],
+  ["Hyllinge", "Brännaregatan 2, 265 75 Hyllinge, Sweden"],
+  ["Kalmar", "Bilbyggarvägen 5, 393 56 Kalmar, Sweden"],
+  ["Karlstad", "Banvaktarvägen 5, 656 39 Karlstad, Sweden"],
+  ["Knivsta", "Hyvelgatan 1, 741 71 Knivsta, Sweden"],
+  ["Linköping", "Östra Svedengatan 31, 582 73 Linköping, Sweden"],
+  ["Löddeköpinge", "Handelsvägen 1, 246 42 Löddeköpinge, Sweden"],
+  ["Malmö, Bernstorp", "Vassvägen 26, 232 61 Arlöv, Sweden"],
+  ["Malmö, Svågertorp", "Nornegatan 8, 215 86 Malmö, Sweden"],
+  ["Norrköping", "Kromgatan 2, 602 23 Norrköping, Sweden"],
+  ["Stockholm, Bromma", "Masugnsvägen 36, 168 67 Stockholm, Sweden"],
+  ["Stockholm, Järfälla", "Enköpingsvägen 41, 177 38 Järfälla, Sweden"],
+  ["Stockholm, Länna", "Gamla Nynäsvägen 600, 142 51 Skogås, Sweden"],
+  ["Stockholm, Norsborg", "Segersbyvägen 26, 145 63 Norsborg, Sweden"],
+  ["Stockholm, Sickla", "Sickla Allé 2-4, 131 65 Nacka, Sweden"],
+  ["Stockholm, Upplands Väsby", "Kranvägen 8, 194 61 Upplands Väsby, Sweden"],
+  ["Sundsvall", "Gesällvägen 13, 863 41 Sundsvall, Sweden"],
+  ["Uddevalla", "Hedkärr 103, 451 76 Uddevalla, Sweden"],
+  ["Umeå", "Skalbaggevägen 5, 906 20 Umeå, Sweden"],
+  ["Uppsala", "Verkstadsgatan 16, 753 23 Uppsala, Sweden"],
+  ["Västerås", "Hallsta Gårdsgata 1, 721 38 Västerås, Sweden"],
+  ["Växjö", "Älgvägen 3, 352 45 Växjö, Sweden"],
+  ["Örebro", "Säljarevägen 7, 702 36 Örebro, Sweden"],
+  ["Östersund", "Hagvägen 4, 831 48 Östersund, Sweden"]
 ];
-// Fasta koordinater per varuhus, så att sidan slipper slå upp alla varuhus vid första sökningen.
-// Uppdatera genom att ändra adressen ovan, tömma tabellen ({}), köra en sökning och sedan köra copy(exportStoreCoords()) i konsolen.
-const STORE_COORDS={"Göteborg, Bäckebol":{"lat":57.74619,"lon":11.99374},"Göteborg, Sisjön":{"lat":57.64251,"lon":11.95425},"Hyllinge":{"lat":56.09897,"lon":12.85548},"Kalmar":{"lat":56.68616,"lon":16.31501},"Karlstad":{"lat":59.39557,"lon":13.58431},"Knivsta":{"lat":59.74292,"lon":17.8098},"Linköping":{"lat":58.4333,"lon":15.60875},"Löddeköpinge":{"lat":55.77151,"lon":12.98847},"Malmö, Bernstorp":{"lat":55.61271,"lon":13.10622},"Malmö, Svågertorp":{"lat":55.55199,"lon":12.99766},"Norrköping":{"lat":58.6106,"lon":16.16193},"Stockholm, Bromma":{"lat":59.35259,"lon":17.96072},"Stockholm, Järfälla":{"lat":59.42007,"lon":17.85469},"Stockholm, Länna":{"lat":59.19923,"lon":18.13515},"Stockholm, Norsborg":{"lat":59.23876,"lon":17.83467},"Stockholm, Sickla":{"lat":59.30262,"lon":18.11514},"Stockholm, Upplands Väsby":{"lat":59.49972,"lon":17.92268},"Sundsvall":{"lat":62.43894,"lon":17.33363},"Uddevalla":{"lat":58.35021,"lon":11.79288},"Umeå":{"lat":63.85503,"lon":20.29485},"Uppsala":{"lat":59.84868,"lon":17.68844},"Västerås":{"lat":59.61133,"lon":16.46956},"Växjö":{"lat":56.90428,"lon":14.81812},"Örebro":{"lat":59.22168,"lon":15.14034},"Östersund":{"lat":63.16962,"lon":14.68972}};
-const $=id=>document.getElementById(id), cacheKey="bauhausMontageDrive_v2";
-let cache={};try{cache=JSON.parse(localStorage.getItem(cacheKey)||"{}")}catch(e){}
-const wait=ms=>new Promise(r=>setTimeout(r,ms));
-const esc=s=>String(s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
-const km1=n=>n.toFixed(1).replace(".",",");
-// 1 mil = 10 km. dist() för uppmätta avstånd (57,3 km (5,7 mil)), kmMil() för gränser (60 km (6 mil)).
-const fmtNum=n=>Number.isInteger(n)?String(n):km1(n);
-const dist=n=>`${km1(n)} km (${km1(n/10)} mil)`;
-const kmMil=n=>`${fmtNum(n)} km (${fmtNum(n/10)} mil)`;
-function save(){try{localStorage.setItem(cacheKey,JSON.stringify(cache))}catch(e){}}
-function status(t,k=""){$("status").className="status "+k;$("status").textContent=t}
-// Hämtar JSON med tidsgräns och ett nytt försök vid nätverksfel, 429 eller serverfel.
-async function getJson(url,{tries=2,timeout=12000}={}){
- let last;
- for(let t=0;t<tries;t++){
-  const ctl=new AbortController(),timer=setTimeout(()=>ctl.abort(),timeout);
-  try{
-   const r=await fetch(url,{signal:ctl.signal});
-   if(r.ok)return await r.json();
-   last=Error("HTTP "+r.status);
-   if(r.status<500&&r.status!==429)break;
-  }catch(e){last=e}
-  finally{clearTimeout(timer)}
-  if(t<tries-1)await wait(1500);
- }
- throw last||Error("Nätverksfel");
-}
-async function geocode(q){
- const key="geo:"+q.toLowerCase().trim();if(cache[key])return cache[key];
- let d;
- try{d=await getJson("https://nominatim.openstreetmap.org/search?format=jsonv2&limit=1&countrycodes=se&q="+encodeURIComponent(q))}
- catch(e){throw Error("Adressökningen svarade inte. Försök igen senare.")}
- if(!d.length)return null;
- const p={lat:+d[0].lat,lon:+d[0].lon,label:d[0].display_name};cache[key]=p;save();return p;
-}
-function crow(a,b){const rad=x=>x*Math.PI/180,R=6371,d1=rad(b.lat-a.lat),d2=rad(b.lon-a.lon),z=Math.sin(d1/2)**2+Math.cos(rad(a.lat))*Math.cos(rad(b.lat))*Math.sin(d2/2)**2;return 2*R*Math.asin(Math.sqrt(z))}
-async function getStores(){
- const out=[];
- for(let i=0;i<stores.length;i++){
-  const [name,address]=stores[i];let p=STORE_COORDS[name]||cache["store:"+name];
-  if(!p){status(`Hämtar varuhusens positioner (${i+1} av ${stores.length})…`);await wait(i?1100:0);p=await geocode(address);if(p){cache["store:"+name]=p;save()}}
-  if(p)out.push({name,address,lat:p.lat,lon:p.lon});
- }
- return out;
-}
-// Körs en gång i webbläsarens konsol: copy(exportStoreCoords()) – klistra sedan in resultatet istället för "const STORE_COORDS={};".
-function exportStoreCoords(){
- const o={};for(const [n] of stores){const p=cache["store:"+n];if(p)o[n]={lat:+(+p.lat).toFixed(5),lon:+(+p.lon).toFixed(5)}}
- return "const STORE_COORDS="+JSON.stringify(o)+";";
-}
-async function routeKm(a,b){
- const key=`route:${a.lat},${a.lon}:${b.lat},${b.lon}`;if(cache[key]!=null)return cache[key];
- const d=await getJson(`https://router.project-osrm.org/route/v1/driving/${a.lon},${a.lat};${b.lon},${b.lat}?overview=false&alternatives=false&steps=false`);
- if(d.code!=="Ok"||!d.routes?.length)return null;
- const val=d.routes[0].distance/1000;cache[key]=val;save();return val;
-}
-$("check").addEventListener("click",async()=>{
- const q=$("address").value.trim();$("result").hidden=true;
- if(!q){status("Skriv in en adress eller ett postnummer först.","warn");$("address").focus();return}
- const btn=$("check");btn.disabled=true;
- try{
-  status("Söker efter kundens adress…");const customer=await geocode(q+", Sverige");
-  if(!customer){status("Kunde inte hitta adressen. Prova fullständig adress inklusive ort eller postnummer.","warn");return}
-  const all=await getStores();if(!all.length)throw Error("Kunde inte hämta varuhusens positioner.");
-  // Fågelvägen används bara för att välja ut några kandidater; själva beslutet bygger alltid på körväg.
-  const shortlist=all.map(s=>({...s,approx:crow(customer,s)})).sort((a,b)=>a.approx-b.approx).slice(0,SHORTLIST);
-  const ranked=[];let routeError=null;
-  for(let i=0;i<shortlist.length;i++){
-   const s=shortlist[i];status(`Beräknar körväg till varuhus (${i+1} av ${shortlist.length})…`);
-   try{const d=await routeKm(customer,s);if(d!=null)ranked.push({...s,distance:d})}catch(e){routeError=routeError||e}
+
+const STORE_COORDS = {"Göteborg, Bäckebol":{"lat":57.74619,"lon":11.99374},"Göteborg, Sisjön":{"lat":57.64251,"lon":11.95425},"Hyllinge":{"lat":56.09897,"lon":12.85548},"Kalmar":{"lat":56.68616,"lon":16.31501},"Karlstad":{"lat":59.39557,"lon":13.58431},"Knivsta":{"lat":59.74292,"lon":17.8098},"Linköping":{"lat":58.4333,"lon":15.60875},"Löddeköpinge":{"lat":55.77151,"lon":12.98847},"Malmö, Bernstorp":{"lat":55.61271,"lon":13.10622},"Malmö, Svågertorp":{"lat":55.55199,"lon":12.99766},"Norrköping":{"lat":58.6106,"lon":16.16193},"Stockholm, Bromma":{"lat":59.35259,"lon":17.96072},"Stockholm, Järfälla":{"lat":59.42007,"lon":17.85469},"Stockholm, Länna":{"lat":59.19923,"lon":18.13515},"Stockholm, Norsborg":{"lat":59.23876,"lon":17.83467},"Stockholm, Sickla":{"lat":59.30262,"lon":18.11514},"Stockholm, Upplands Väsby":{"lat":59.49972,"lon":17.92268},"Sundsvall":{"lat":62.43894,"lon":17.33363},"Uddevalla":{"lat":58.35021,"lon":11.79288},"Umeå":{"lat":63.85503,"lon":20.29485},"Uppsala":{"lat":59.84868,"lon":17.68844},"Västerås":{"lat":59.61133,"lon":16.46956},"Växjö":{"lat":56.90428,"lon":14.81812},"Örebro":{"lat":59.22168,"lon":15.14034},"Östersund":{"lat":63.16962,"lon":14.68972}};
+
+const $ = id => document.getElementById(id);
+const cacheKey = "bauhausMontageDrive_v3";
+let cache = {};
+try { cache = JSON.parse(localStorage.getItem(cacheKey) || "{}"); } catch (e) {}
+
+const wait = ms => new Promise(r => setTimeout(r, ms));
+const esc = s => String(s).replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+const km1 = n => n.toFixed(1).replace(".", ",");
+const dist = n => `${km1(n)} km (${km1(n / 10)} mil)`;
+
+function save() { try { localStorage.setItem(cacheKey, JSON.stringify(cache)); } catch (e) {} }
+function status(t, k = "") { $("status").className = "status " + k; $("status").textContent = t; }
+
+async function getJson(url, { tries = 2, timeout = 12000 } = {}) {
+  let last;
+  for (let t = 0; t < tries; t++) {
+    const ctl = new AbortController(), timer = setTimeout(() => ctl.abort(), timeout);
+    try {
+      const r = await fetch(url, { signal: ctl.signal });
+      if (r.ok) return await r.json();
+      last = Error("HTTP " + r.status);
+      if (r.status < 500 && r.status !== 429) break;
+    } catch (e) { last = e; }
+    finally { clearTimeout(timer); }
+    if (t < tries - 1) await wait(1500);
   }
-  if(!ranked.length)throw Error(routeError?"Ruttjänsten svarade inte. Försök igen senare.":"Kunde inte beräkna någon körväg. Försök igen eller kontrollera adressen manuellt.");
-  ranked.sort((a,b)=>a.distance-b.distance);
-  // Varje varuhus har sin gräns. Det varuhus med störst marginal till sin gräns avgör resultatet (oftast det närmaste).
-  ranked.forEach(s=>{s.limit=limitFor(s.name);s.margin=s.limit-s.distance});
-  const nearest=ranked[0],near=ranked.reduce((a,b)=>b.margin>a.margin?b:a),lim=near.limit,ok=near.margin>=0,border=Math.abs(near.margin)<=BORDER_KM,res=$("result");
-  const cls=border?"warn":(ok?"good":"bad");
-  const title=(ok?"Inom ":"Över ")+kmMil(lim)+" körväg"+(border?" – gränsfall":"");
-  const mapUrl=`https://www.google.com/maps/dir/?api=1&origin=${near.lat},${near.lon}&destination=${customer.lat},${customer.lon}&travelmode=driving`;
-  res.hidden=false;
-  res.innerHTML=`<div class="status ${cls}"><p class="result-title">${title}</p><div class="distance">${km1(near.distance)} km <span class="mil">(${km1(near.distance/10)} mil)</span></div><div>beräknat köravstånd till närmaste hittade varuhus</div>${border?`<p class="note"><strong>Nära gränsen:</strong> kontrollera rutten manuellt innan beslut.</p>`:""}</div>
-  <div class="details"><div class="detail"><small>${near===nearest?"Närmaste varuhus enligt beräknad körväg":"Varuhus som avgör resultatet"}</small><strong>${esc(near.name)}</strong><br>${esc(near.address.replace(", Sweden",""))}</div><div class="detail"><small>Avstånd från gränsen (${kmMil(lim)})</small><strong>${dist(Math.abs(near.margin))} ${ok?"under gränsen":"över gränsen"}</strong></div><div class="detail"><small>Hittad adress – kontrollera att den stämmer</small><strong>${esc(customer.label||q)}</strong></div></div>
-  <a class="maplink" href="${mapUrl}" target="_blank" rel="noopener">Öppna rutten i Google Maps</a>
-  <h3>Kontrollerade varuhus</h3><ol>${ranked.slice(0,5).map(s=>`<li><strong>${esc(s.name)}</strong> – ${dist(s.distance)} körväg</li>`).join("")}</ol>
-  <p class="note">Köravståndet kommer från en automatisk ruttjänst och kan variera beroende på vald väg. Kontrollera extra noga om resultatet ligger nära gränsen.</p>`;
-  status("Kontrollen är klar.");
- }catch(e){status(e.message||"Något gick fel. Kontrollera internetanslutningen och försök igen.","warn")}
- finally{btn.disabled=false}
+  throw last || Error("Nätverksfel");
+}
+
+async function geocode(q) {
+  const key = "geo:" + q.toLowerCase().trim();
+  if (cache[key]) return cache[key];
+  let d;
+  try {
+    d = await getJson("https://nominatim.openstreetmap.org/search?format=jsonv2&limit=1&countrycodes=se&q=" + encodeURIComponent(q));
+  } catch (e) {
+    throw Error("Adressökningen svarade inte. Försök igen.");
+  }
+  if (!d.length) return null;
+  const p = { lat: +d[0].lat, lon: +d[0].lon, label: d[0].display_name };
+  cache[key] = p; save();
+  return p;
+}
+
+function crow(a, b) {
+  const rad = x => x * Math.PI / 180, R = 6371;
+  const d1 = rad(b.lat - a.lat), d2 = rad(b.lon - a.lon);
+  const z = Math.sin(d1 / 2) ** 2 + Math.cos(rad(a.lat)) * Math.cos(rad(b.lat)) * Math.sin(d2 / 2) ** 2;
+  return 2 * R * Math.asin(Math.sqrt(z));
+}
+
+async function getStores() {
+  const out = [];
+  for (let i = 0; i < stores.length; i++) {
+    const [name, address] = stores[i];
+    let p = STORE_COORDS[name] || cache["store:" + name];
+    if (!p) {
+      status(`Hämtar varuhusens positioner (${i + 1} av ${stores.length})…`);
+      await wait(i ? 1100 : 0);
+      p = await geocode(address);
+      if (p) { cache["store:" + name] = p; save(); }
+    }
+    if (p) out.push({ name, address, lat: p.lat, lon: p.lon });
+  }
+  return out;
+}
+
+async function routeKm(a, b) {
+  const key = `route:${a.lat},${a.lon}:${b.lat},${b.lon}`;
+  if (cache[key] != null) return cache[key];
+  const d = await getJson(`https://router.project-osrm.org/route/v1/driving/${a.lon},${a.lat};${b.lon},${b.lat}?overview=false&alternatives=false&steps=false`);
+  if (d.code !== "Ok" || !d.routes?.length) return null;
+  const val = d.routes[0].distance / 1000;
+  cache[key] = val; save();
+  return val;
+}
+
+$("check").addEventListener("click", async () => {
+  const q = $("address").value.trim();
+  $("result").hidden = true;
+  if (!q) { status("Skriv in en adress eller ett postnummer först.", "warn"); $("address").focus(); return; }
+
+  const btn = $("check");
+  btn.disabled = true;
+
+  try {
+    status("Söker efter kundens adress…");
+    const customer = await geocode(q + ", Sverige");
+    if (!customer) { status("Kunde inte hitta adressen. Prova med exakt adress och ort.", "warn"); return; }
+
+    const all = await getStores();
+    if (!all.length) throw Error("Kunde inte hämta varuhusens positioner.");
+
+    const shortlist = all.map(s => ({ ...s, approx: crow(customer, s) })).sort((a, b) => a.approx - b.approx).slice(0, SHORTLIST);
+    const ranked = [];
+    let routeError = null;
+
+    for (let i = 0; i < shortlist.length; i++) {
+      const s = shortlist[i];
+      status(`Beräknar körväg till varuhus (${i + 1} av ${shortlist.length})…`);
+      try {
+        const d = await routeKm(customer, s);
+        if (d != null) ranked.push({ ...s, distance: d });
+      } catch (e) { routeError = routeError || e; }
+    }
+
+    if (!ranked.length) throw Error(routeError ? "Ruttjänsten svarade inte." : "Kunde inte beräkna körväg.");
+
+    ranked.sort((a, b) => a.distance - b.distance);
+    const nearest = ranked[0];
+    const isOstersund = nearest.name.includes("Östersund");
+    const distKm = nearest.distance;
+
+    // Regler för Montageservice
+    let montageOk = false;
+    let montageText = "";
+    let montageClass = "no";
+    let milFeeText = "";
+
+    if (isOstersund) {
+      if (distKm <= LIMIT_MONTAGE) {
+        montageOk = true;
+        montageText = "Godkänd (Inom 6 mil)";
+        montageClass = "ok";
+      } else if (distKm <= OSTERSUND_MAX) {
+        montageOk = true;
+        const extraKm = distKm - LIMIT_MONTAGE;
+        const extraMil = Math.ceil(extraKm / 10);
+        const fee = extraMil * COST_PER_MIL;
+        montageText = `Godkänd med milersättning (${extraMil} mil extra)`;
+        montageClass = "fee";
+        milFeeText = `<strong>Milersättning:</strong> ${fee} kr (${extraMil} mil á 190 kr/mil utöver 6 mil)`;
+      } else {
+        montageText = `Ej godkänd (Över maxgräns 10 mil)`;
+      }
+    } else {
+      if (distKm <= LIMIT_MONTAGE) {
+        montageOk = true;
+        montageText = "Godkänd (Inom 6 mil)";
+        montageClass = "ok";
+      } else {
+        montageText = "Ej godkänd (Över 6 mil)";
+      }
+    }
+
+    // Regler för Hembesök
+    const hembesokOk = distKm <= LIMIT_HEMBESOK;
+    const hembesokText = hembesokOk ? "Godkänd (Inom 4 mil)" : "Ej godkänd (Över 4 mil)";
+    const hembesokClass = hembesokOk ? "ok" : "no";
+
+    // Överskridande & Statusfärg
+    let panelStatusClass = "good";
+    if (!montageOk && !hembesokOk) {
+      panelStatusClass = "bad";
+    } else if (montageClass === "fee") {
+      panelStatusClass = "warn";
+    }
+
+    // Statisk kartbild via OpenStreetMap Tiles (API-fri)
+    const bboxPad = 0.015;
+    const minLat = Math.min(customer.lat, nearest.lat) - bboxPad;
+    const maxLat = Math.max(customer.lat, nearest.lat) + bboxPad;
+    const minLon = Math.min(customer.lon, nearest.lon) - bboxPad;
+    const maxLon = Math.max(customer.lon, nearest.lon) + bboxPad;
+    const staticMapUrl = `https://www.openstreetmap.org/export/embed.html?bbox=${minLon}%2C${minLat}%2C${maxLon}%2C${maxLat}&layer=mapnik&marker=${customer.lat}%2C${customer.lon}`;
+
+    const googleMapsDir = `https://www.google.com/maps/dir/?api=1&origin=${nearest.lat},${nearest.lon}&destination=${customer.lat},${customer.lon}&travelmode=driving`;
+    const googleStreetView = `https://www.google.com/maps/@?api=1&map_action=pano&viewpoint=${customer.lat},${customer.lon}`;
+
+    const res = $("result");
+    res.hidden = false;
+    res.innerHTML = `
+      <div class="status ${panelStatusClass}">
+        <p class="result-title">Närmaste varuhus: ${esc(nearest.name)}</p>
+        <div class="distance">${km1(distKm)} km <span class="mil">(${km1(distKm / 10)} mil)</span></div>
+        ${milFeeText ? `<p style="margin:6px 0 0;font-size:1.05rem;">${milFeeText}</p>` : ""}
+      </div>
+
+      <div class="details">
+        <div class="detail">
+          <small>Hembesök (Max 4 mil)</small>
+          <span class="badge ${hembesokClass}">${hembesokText}</span>
+        </div>
+        <div class="detail">
+          <small>Montageservice (${isOstersund ? "Östersund max 10 mil" : "Max 6 mil"})</small>
+          <span class="badge ${montageClass}">${montageText}</span>
+        </div>
+        <div class="detail">
+          <small>Hittad adress</small>
+          <strong>${esc(customer.label || q)}</strong>
+          <iframe class="map-preview" src="${staticMapUrl}" style="border:0;" loading="lazy"></iframe>
+          <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:6px;">
+            <a class="maplink" href="${googleMapsDir}" target="_blank" rel="noopener">Öppna rutt i Google Maps</a>
+            <a class="maplink" href="${googleStreetView}" target="_blank" rel="noopener">Gatuvy (Street View)</a>
+          </div>
+        </div>
+      </div>
+
+      <h3>Närmaste varuhus</h3>
+      <ol>${ranked.slice(0, 5).map(s => `<li><strong>${esc(s.name)}</strong> –${dist(s.distance)} körväg</li>`).join("")}</ol>
+    `;
+
+    status("Kontrollen är klar.");
+  } catch (e) {
+    status(e.message || "Något gick fel vid beräkningen.", "warn");
+  } finally {
+    btn.disabled = false;
+  }
 });
-$("address").addEventListener("keydown",e=>{if(e.key==="Enter")$("check").click()});
-</script></body></html>
+
+$("address").addEventListener("keydown", e => { if (e.key === "Enter") $("check").click(); });
+</script>
+</body>
+</html>
